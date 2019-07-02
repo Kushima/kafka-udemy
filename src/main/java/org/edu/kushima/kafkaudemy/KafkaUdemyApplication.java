@@ -1,20 +1,13 @@
 package org.edu.kushima.kafkaudemy;
 
-import java.time.Duration;
-import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +22,7 @@ public class KafkaUdemyApplication {
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		SpringApplication.run(KafkaUdemyApplication.class, args);
 
-		String mod = "consumer";
+		String mod = "producer";
 
 		String topic = "topic2";
 
@@ -76,30 +69,8 @@ public class KafkaUdemyApplication {
 			prod.flush();
 			prod.close();
 		} else {
-			String bootstrapServers = "127.0.0.1:9092";
-			String groupId = "java_app";
-
-			Properties props = new Properties();
-			props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-			props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-			props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-			props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-			props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-			KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-
-			consumer.subscribe(Collections.singleton(topic));
-
-			while (true) {
-				ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
-				
-				for (ConsumerRecord<String, String> record : records) {
-					LOG.info("Key: {}. Value: {}", record.key(), record.value());
-					LOG.info("Partition: {}, Offset: {}", record.partition(), record.offset());
-				}
-			}
+			new KafkaThreadConsumer().run();
 		}
 
 	}
-
 }
